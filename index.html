@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UIU Bookshop</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* Hide scrollbar for clean UI in cart/modals but keep functionality */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-50 font-sans text-slate-900 flex flex-col overflow-x-hidden">
+
+    <!-- --- NAVIGATION BAR --- -->
+    <nav class="sticky top-0 z-40 w-full bg-white border-b border-slate-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center gap-2 cursor-pointer" onclick="resetFilters()">
+                    <div class="bg-orange-500 p-2 rounded-lg text-white">
+                        <i data-lucide="book-open" class="w-6 h-6"></i>
+                    </div>
+                    <span class="font-bold text-lg sm:text-xl tracking-tight text-slate-800">UIU <span class="text-orange-500">Bookshop</span></span>
+                </div>
+
+                <!-- Desktop Search -->
+                <div class="hidden md:flex flex-1 max-w-md mx-8 relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i data-lucide="search" class="h-5 w-5 text-slate-400"></i>
+                    </div>
+                    <input type="text" id="desktop-search" class="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-full leading-5 bg-slate-50 placeholder-slate-500 focus:outline-none focus:bg-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 sm:text-sm transition-colors" placeholder="Search books by title or author...">
+                </div>
+
+                <!-- Actions -->
+                <div class="flex items-center gap-2 sm:gap-4">
+                    <button class="relative p-2 text-slate-600 hover:text-orange-500 transition-colors focus:outline-none" onclick="openCart()">
+                        <i data-lucide="shopping-cart" class="w-6 h-6"></i>
+                        <span id="cart-badge" class="hidden absolute top-0 right-0 items-center justify-center px-1.5 py-0.5 text-[10px] sm:text-xs font-bold leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-orange-500 rounded-full">
+                            0
+                        </span>
+                    </button>
+                    
+                    <!-- Mobile menu button -->
+                    <button class="md:hidden p-2 text-slate-600 focus:outline-none" onclick="toggleMobileMenu()">
+                        <i data-lucide="menu" id="mobile-menu-icon" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Search & Menu Expand -->
+        <div id="mobile-menu" class="hidden md:hidden border-t border-slate-200 bg-white p-4 space-y-4 shadow-inner">
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i data-lucide="search" class="h-5 w-5 text-slate-400"></i>
+                </div>
+                <input type="text" id="mobile-search" class="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg leading-5 bg-slate-50 placeholder-slate-500 focus:outline-none focus:bg-white focus:ring-2 focus:ring-orange-500 text-sm" placeholder="Search catalog...">
+            </div>
+            <div id="mobile-categories" class="flex flex-wrap gap-2">
+                <!-- Mobile categories injected here -->
+            </div>
+        </div>
+    </nav>
+
+    <!-- --- HERO SECTION --- -->
+    <div id="hero-section" class="bg-slate-900 text-white relative overflow-hidden transition-all duration-300">
+        <div class="absolute inset-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80&w=2000')] bg-cover bg-center mix-blend-overlay"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 py-12 md:py-24">
+            <div class="md:w-2/3">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/20 text-orange-400 text-xs sm:text-sm font-medium mb-4 sm:mb-6 border border-orange-500/30">
+                    <i data-lucide="map-pin" class="w-4 h-4"></i> Same-day Campus Pickup
+                </div>
+                <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-3 sm:mb-4">
+                    Empower Your Mind with <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-300">UIU Bookshop</span>
+                </h1>
+                <p class="text-base sm:text-lg md:text-xl text-slate-300 mb-6 sm:mb-8 max-w-2xl">
+                    For UIU students who must collect course books and exam supplies on tight deadlines, our digital brick-and-click shop guarantees same-day pickup.
+                </p>
+                <div class="flex flex-wrap gap-4">
+                    <button onclick="document.getElementById('books-section').scrollIntoView({ behavior: 'smooth' })" class="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 sm:px-6 sm:py-3 rounded-lg font-semibold transition-colors flex items-center gap-2 shadow-lg shadow-orange-500/30 text-sm sm:text-base w-full sm:w-auto justify-center">
+                        Browse Catalog <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- --- TRUST BANNER --- -->
+    <div id="trust-banner" class="bg-white border-b border-slate-200 shadow-sm relative z-20 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 divide-y md:divide-y-0 md:divide-x divide-slate-100 text-left">
+                <div class="flex items-center gap-3 md:gap-4 pt-2 md:pt-0 md:px-6">
+                    <div class="bg-blue-50 text-blue-600 p-2 sm:p-3 rounded-full flex-shrink-0"><i data-lucide="shield-check" class="w-5 h-5 sm:w-6 sm:h-6"></i></div>
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-xs sm:text-sm">100% Authentic Books</h3>
+                        <p class="text-[10px] sm:text-xs text-slate-500">Direct from verified publishers</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 md:gap-4 pt-4 md:pt-0 md:px-6">
+                    <div class="bg-green-50 text-green-600 p-2 sm:p-3 rounded-full flex-shrink-0"><i data-lucide="clock" class="w-5 h-5 sm:w-6 sm:h-6"></i></div>
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-xs sm:text-sm">2-Hour Campus BOPIS</h3>
+                        <p class="text-[10px] sm:text-xs text-slate-500">Buy online, pick up at UIU</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 md:gap-4 pt-4 md:pt-0 md:px-6">
+                    <div class="bg-orange-50 text-orange-600 p-2 sm:p-3 rounded-full flex-shrink-0"><i data-lucide="credit-card" class="w-5 h-5 sm:w-6 sm:h-6"></i></div>
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-xs sm:text-sm">Seamless Payments</h3>
+                        <p class="text-[10px] sm:text-xs text-slate-500">bKash, Nagad, or COD</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- --- MAIN CONTENT --- -->
+    <main id="books-section" class="flex-1 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8 w-full">
+        
+        <!-- Category Filters (Desktop) -->
+        <div class="hidden md:flex items-center justify-between mb-8 pb-4 border-b border-slate-200">
+            <h2 id="desktop-section-title" class="text-2xl font-bold text-slate-800">Our Collection</h2>
+            <div id="desktop-categories" class="flex gap-2">
+                <!-- Categories injected here -->
+            </div>
+        </div>
+
+        <!-- Mobile Header Equivalent -->
+        <div class="md:hidden mb-4 px-1">
+            <h2 id="mobile-section-title" class="text-lg font-bold text-slate-800">Our Collection</h2>
+        </div>
+
+        <!-- Book Grid -->
+        <div id="books-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
+            <!-- Books injected here -->
+        </div>
+
+        <!-- Empty State (Hidden by default) -->
+        <div id="empty-state" class="hidden text-center py-16 sm:py-24 bg-white rounded-2xl border border-slate-100 shadow-sm mx-1">
+            <i data-lucide="book-open" class="mx-auto text-slate-300 mb-4 w-10 h-10 sm:w-12 sm:h-12"></i>
+            <h3 class="text-lg sm:text-xl font-bold text-slate-700 mb-2">No items found</h3>
+            <p class="text-sm sm:text-base text-slate-500">Try adjusting your search or filter criteria.</p>
+            <button onclick="resetFilters()" class="mt-6 text-orange-500 hover:text-orange-600 font-medium underline text-sm sm:text-base">
+                Clear all filters
+            </button>
+        </div>
+    </main>
+
+    <!-- --- FOOTER --- -->
+    <footer class="bg-slate-900 text-slate-400 py-10 sm:py-12 mt-8 sm:mt-12 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div class="col-span-1 md:col-span-2">
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="bg-orange-500 p-1.5 rounded text-white">
+                        <i data-lucide="book-open" class="w-5 h-5"></i>
+                    </div>
+                    <span class="font-bold text-xl text-white">UIU <span class="text-orange-500">Bookshop</span></span>
+                </div>
+                <p class="mb-4 max-w-sm text-sm sm:text-base">
+                    Providing top-tier educational resources, academic texts, and literary classics for students, faculty, and lifelong learners.
+                </p>
+                <div class="inline-block mt-2 border border-slate-700 bg-slate-800 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-slate-300">
+                    DBID: <span class="text-white">Pending Registration</span>
+                </div>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-4 uppercase text-sm tracking-wider">Trust & Policies</h4>
+                <ul class="space-y-2 text-sm">
+                    <li><button onclick="openPolicy('return')" class="hover:text-orange-400 transition-colors focus:outline-none text-left">Return & Refund Policy</button></li>
+                    <li><button onclick="openPolicy('privacy')" class="hover:text-orange-400 transition-colors focus:outline-none text-left">Privacy Notice (PDP Draft)</button></li>
+                    <li><button onclick="openPolicy('rights')" class="hover:text-orange-400 transition-colors focus:outline-none text-left">Consumer Rights Info</button></li>
+                    <li><button onclick="openPolicy('dcog')" class="hover:text-orange-400 transition-colors text-xs opacity-75 focus:outline-none text-left">Compliant with DCOG-2021</button></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-4 uppercase text-sm tracking-wider">Contact</h4>
+                <ul class="space-y-2 text-sm">
+                    <li>United City, Madani Avenue</li>
+                    <li>Badda, Dhaka 1212</li>
+                    <li>Bangladesh</li>
+                    <li class="mt-4"><a href="mailto:bookshop@uiu.ac.bd" class="text-orange-400 hover:text-orange-300">bookshop@uiu.ac.bd</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 pt-6 border-t border-slate-800 text-xs sm:text-sm text-center md:text-left flex flex-col md:flex-row justify-between items-center">
+            <p>&copy; <span id="current-year"></span> UIU Bookshop. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- --- CART & CHECKOUT DRAWER --- -->
+    <div id="cart-overlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden opacity-0 transition-opacity duration-300" onclick="closeCart()"></div>
+    
+    <div id="cart-drawer" class="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-slate-50 shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+        
+        <!-- Drawer Header (Shared) -->
+        <div class="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-slate-200 bg-white shadow-sm z-20 flex-shrink-0">
+            <div class="flex items-center gap-2 text-slate-800">
+                <button id="cart-back-btn" onclick="goToCheckoutStep(1)" class="hidden p-1.5 -ml-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-colors mr-1">
+                    <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                </button>
+                <i id="cart-header-icon" data-lucide="shopping-cart" class="text-orange-500 w-5 h-5 sm:w-6 sm:h-6"></i>
+                <h2 id="cart-header-title" class="text-lg sm:text-xl font-extrabold tracking-tight">Your Cart</h2>
+                <span id="cart-count-title" class="bg-orange-100 text-orange-800 text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-md ml-1 sm:ml-2">0 items</span>
+            </div>
+            <div class="flex items-center gap-1 sm:gap-2">
+                <button id="clear-cart-btn" onclick="clearCart()" class="hidden text-xs sm:text-sm font-medium text-red-500 hover:text-red-700 hover:bg-red-50 px-2 py-1.5 rounded-md transition-colors">
+                    Clear All
+                </button>
+                <button onclick="closeCart()" class="p-1.5 sm:p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= STEP 1: CART ITEMS ================= -->
+        <div id="checkout-step-1" class="flex-1 overflow-y-auto no-scrollbar flex flex-col w-full h-full bg-slate-50">
+            <!-- Cart Items List -->
+            <div id="cart-items" class="p-4 sm:p-6 space-y-3 sm:space-y-4 flex-1 flex flex-col">
+                <!-- Items injected here via JS -->
+            </div>
+
+            <!-- Cart Step 1 Footer -->
+            <div id="cart-step1-footer" class="border-t border-slate-200 p-4 sm:p-6 bg-white hidden shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-10 mt-auto flex-shrink-0">
+                <div class="flex justify-between items-center text-base sm:text-lg font-bold text-slate-900 mb-4 sm:mb-5">
+                    <p>Subtotal</p>
+                    <p id="step1-subtotal" class="text-orange-600 text-xl">৳0</p>
+                </div>
+                <button onclick="goToCheckoutStep(2)" class="w-full flex items-center justify-center rounded-lg bg-orange-500 px-4 sm:px-6 py-3.5 sm:py-4 text-sm sm:text-base font-bold text-white shadow-lg shadow-orange-500/30 hover:bg-orange-600 transition-transform transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2">
+                    Proceed to Checkout <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= STEP 2: CHECKOUT DETAILS ================= -->
+        <div id="checkout-step-2" class="hidden flex-1 overflow-y-auto no-scrollbar flex-col w-full h-full bg-slate-50">
+            <div class="p-4 sm:p-6 space-y-4 sm:space-y-5 flex-1">
+                
+                <!-- Delivery Options Card -->
+                <div class="bg-white rounded-xl shadow-[0_2px_8px_-3px_rgba(0,0,0,0.08)] border border-slate-100 p-4 sm:p-5">
+                    <h4 class="text-xs sm:text-sm font-bold text-slate-900 mb-3 sm:mb-4 uppercase tracking-wider flex items-center gap-2">
+                        <i data-lucide="truck" class="w-4 h-4 text-orange-500"></i> Delivery Method
+                    </h4>
+                    <div class="space-y-2 sm:space-y-3">
+                        <label id="lbl-bopis" class="flex items-center justify-between p-2.5 sm:p-3 border rounded-lg cursor-pointer transition-colors border-orange-500 bg-orange-50">
+                            <div class="flex items-center gap-2 sm:gap-3">
+                                <input type="radio" name="delivery" value="BOPIS" checked onchange="updateDelivery('BOPIS')" class="text-orange-500 focus:ring-orange-500 w-4 h-4">
+                                <div>
+                                    <p class="font-medium text-slate-900 text-xs sm:text-sm">Same-day BOPIS</p>
+                                    <p class="text-[10px] sm:text-xs text-slate-500">Pick up on Campus</p>
+                                </div>
+                            </div>
+                            <span class="font-bold text-green-600 text-xs sm:text-sm">Free</span>
+                        </label>
+                        <label id="lbl-delivery" class="flex items-center justify-between p-2.5 sm:p-3 border rounded-lg cursor-pointer transition-colors border-slate-200 bg-slate-50 hover:bg-slate-100">
+                            <div class="flex items-center gap-2 sm:gap-3">
+                                <input type="radio" name="delivery" value="DELIVERY" onchange="updateDelivery('DELIVERY')" class="text-orange-500 focus:ring-orange-500 w-4 h-4">
+                                <div>
+                                    <p class="font-medium text-slate-900 text-xs sm:text-sm">Off-campus Delivery</p>
+                                    <p class="text-[10px] sm:text-xs text-slate-500">via Pathao / RedX</p>
+                                </div>
+                            </div>
+                            <span class="font-bold text-slate-900 text-xs sm:text-sm">৳60</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Payment Method Card -->
+                <div class="bg-white rounded-xl shadow-[0_2px_8px_-3px_rgba(0,0,0,0.08)] border border-slate-100 p-4 sm:p-5">
+                    <h4 class="text-xs sm:text-sm font-bold text-slate-900 mb-3 sm:mb-4 uppercase tracking-wider flex items-center gap-2">
+                        <i data-lucide="wallet" class="w-4 h-4 text-orange-500"></i> Payment Method
+                    </h4>
+                    <div class="grid grid-cols-2 gap-2 sm:gap-3">
+                        <label id="lbl-cod" class="flex flex-col items-center justify-center p-3 sm:p-4 border rounded-lg cursor-pointer transition-colors text-center border-orange-500 bg-orange-50">
+                            <input type="radio" name="payment" value="COD" checked onchange="updatePayment('COD')" class="sr-only">
+                            <i data-lucide="map-pin" class="w-5 h-5 sm:w-6 sm:h-6 text-orange-500 mb-1.5"></i>
+                            <span class="text-[10px] sm:text-xs font-bold text-orange-700">Cash on Delivery</span>
+                        </label>
+                        <label id="lbl-bkash" class="flex flex-col items-center justify-center p-3 sm:p-4 border rounded-lg cursor-pointer transition-colors text-center border-slate-200 bg-slate-50 hover:bg-slate-100">
+                            <input type="radio" name="payment" value="BKASH" onchange="updatePayment('BKASH')" class="sr-only">
+                            <i data-lucide="credit-card" class="w-5 h-5 sm:w-6 sm:h-6 text-slate-400 mb-1.5"></i>
+                            <span class="text-[10px] sm:text-xs font-bold text-slate-600">bKash / Nagad</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Customer Details Card -->
+                <div class="bg-white rounded-xl shadow-[0_2px_8px_-3px_rgba(0,0,0,0.08)] border border-slate-100 p-4 sm:p-5">
+                    <h4 class="text-xs sm:text-sm font-bold text-slate-900 mb-3 sm:mb-4 uppercase tracking-wider flex items-center gap-2">
+                        <i data-lucide="user" class="w-4 h-4 text-orange-500"></i> Customer Details
+                    </h4>
+                    <div class="space-y-2 sm:space-y-3">
+                        <input type="text" id="cust-name" placeholder="Full Name *" oninput="clearError(this)" class="w-full border border-slate-200 p-2.5 sm:p-3 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-slate-50 transition-colors placeholder-slate-400">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+                            <input type="text" id="cust-id" placeholder="UIU ID *" oninput="clearError(this)" class="w-full border border-slate-200 p-2.5 sm:p-3 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-slate-50 transition-colors placeholder-slate-400">
+                            <input type="tel" id="cust-phone" placeholder="Phone Number *" oninput="clearError(this)" class="w-full border border-slate-200 p-2.5 sm:p-3 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-slate-50 transition-colors placeholder-slate-400">
+                        </div>
+                        <textarea id="cust-address" placeholder="Complete Delivery Address *" rows="2" oninput="clearError(this)" class="hidden w-full border border-slate-200 p-2.5 sm:p-3 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none bg-slate-50 transition-colors placeholder-slate-400"></textarea>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Cart Step 2 Footer (Totals + Confirm) -->
+            <div id="cart-step2-footer" class="border-t border-slate-200 p-4 sm:p-6 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-10 mt-auto flex-shrink-0">
+                <div class="space-y-1.5 sm:space-y-2 mb-4 sm:mb-6">
+                    <div class="flex justify-between text-xs sm:text-sm text-slate-600">
+                        <p>Subtotal</p>
+                        <p id="cart-subtotal" class="font-medium">৳0</p>
+                    </div>
+                    <div class="flex justify-between text-xs sm:text-sm text-slate-600">
+                        <p>Shipping</p>
+                        <p id="cart-shipping" class="font-medium">Free</p>
+                    </div>
+                    <div class="flex justify-between text-base sm:text-lg font-bold text-slate-900 pt-3 mt-3 border-t border-slate-100">
+                        <p>Total to Pay</p>
+                        <p id="cart-total-price" class="text-orange-600 text-xl">৳0</p>
+                    </div>
+                </div>
+
+                <div class="mt-2 sm:mt-4">
+                    <button onclick="handleCheckout()" class="w-full flex items-center justify-center rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 px-4 sm:px-6 py-3.5 sm:py-4 text-sm sm:text-base font-bold text-white shadow-lg shadow-orange-500/30 hover:from-orange-600 hover:to-orange-700 transition-all transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2">
+                        <i data-lucide="lock" class="w-4 h-4 mr-2"></i> Confirm Order
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- --- QUICK VIEW MODAL --- -->
+    <div id="qv-overlay" class="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-6 hidden">
+        <div class="absolute inset-0 bg-slate-900/70 backdrop-blur-sm transition-opacity" onclick="closeQuickView()"></div>
+        <div id="qv-modal" class="relative bg-white sm:rounded-2xl rounded-t-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto flex flex-col md:flex-row transform transition-transform duration-300 translate-y-full no-scrollbar">
+            <button onclick="closeQuickView()" class="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 bg-white/80 backdrop-blur-md hover:bg-slate-100 text-slate-600 p-2 rounded-full transition-colors shadow-sm">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            
+            <div class="md:w-2/5 bg-slate-50 p-6 sm:p-8 flex items-center justify-center border-b md:border-b-0 md:border-r border-slate-100">
+                <img id="qv-img" src="" alt="" class="w-2/3 sm:w-full max-w-xs object-cover rounded-lg shadow-lg">
+            </div>
+            
+            <div class="md:w-3/5 p-5 sm:p-8 flex flex-col">
+                <div class="flex flex-wrap items-center gap-2 mb-3">
+                    <span id="qv-cat" class="bg-orange-100 text-orange-700 text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-md"></span>
+                    <span id="qv-course" class="bg-slate-100 text-slate-600 text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-md"></span>
+                </div>
+                
+                <h2 id="qv-title" class="text-xl sm:text-2xl font-extrabold text-slate-900 mb-1"></h2>
+                <p class="text-sm sm:text-lg text-slate-600 mb-4">by <span id="qv-author" class="font-medium"></span></p>
+                
+                <div class="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6 pb-4 sm:pb-6 border-b border-slate-100">
+                    <div class="flex items-center gap-1 text-amber-500">
+                        <i data-lucide="star" class="fill-amber-500 w-4 h-4 sm:w-5 sm:h-5"></i>
+                        <span id="qv-rating" class="font-bold text-slate-700 ml-1 text-sm"></span>
+                    </div>
+                    <div id="qv-auth-badge" class="flex items-center gap-1 text-blue-600">
+                        <i data-lucide="shield-check" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+                        <span class="text-xs sm:text-sm font-medium">Verified Authentic</span>
+                    </div>
+                </div>
+                
+                <div class="mb-4 sm:mb-6">
+                    <h4 class="text-xs sm:text-sm font-bold text-slate-900 mb-1.5 sm:mb-2">Description</h4>
+                    <p id="qv-desc" class="text-slate-600 text-xs sm:text-sm leading-relaxed"></p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 sm:gap-4 mb-6 sm:mb-8 text-xs sm:text-sm">
+                    <div>
+                        <p class="text-slate-500">Publisher</p>
+                        <p id="qv-pub" class="font-medium text-slate-900"></p>
+                    </div>
+                    <div>
+                        <p class="text-slate-500">Availability</p>
+                        <p id="qv-stock" class="font-medium"></p>
+                    </div>
+                </div>
+                
+                <div class="mt-auto flex items-center justify-between pt-4 sm:pt-6 border-t border-slate-100 pb-2 sm:pb-0">
+                    <span id="qv-price" class="text-2xl sm:text-3xl font-extrabold text-slate-900"></span>
+                    <button id="qv-add-btn" class="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 sm:px-8 sm:py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-orange-500/30 transition-transform transform hover:-translate-y-0.5 text-sm sm:text-base">
+                        <i data-lucide="shopping-cart" class="w-4 h-4 sm:w-5 sm:h-5"></i> Add to Cart
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- --- POLICY MODAL --- -->
+    <div id="policy-overlay" class="fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-6 hidden">
+        <div class="absolute inset-0 bg-slate-900/70 backdrop-blur-sm" onclick="closePolicy()"></div>
+        <div id="policy-modal" class="relative bg-white sm:rounded-2xl rounded-t-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col transform transition-transform duration-300 translate-y-full">
+            
+            <div class="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-200 bg-slate-50">
+                <h2 class="text-base sm:text-xl font-bold text-slate-900 flex items-center gap-2">
+                    <i data-lucide="shield-check" class="text-blue-600 w-5 h-5 sm:w-6 sm:h-6"></i>
+                    <span id="policy-title">Policy</span>
+                </h2>
+                <button onclick="closePolicy()" class="p-1.5 sm:p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-full transition-colors">
+                    <i data-lucide="x" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+                </button>
+            </div>
+            
+            <div id="policy-content" class="p-4 sm:p-6 overflow-y-auto flex-1 text-slate-700 text-xs sm:text-sm leading-relaxed space-y-3 sm:space-y-4 no-scrollbar">
+                <!-- Content injected via JS -->
+            </div>
+            
+            <div class="px-4 sm:px-6 py-3 sm:py-4 border-t border-slate-200 bg-slate-50 flex justify-end pb-6 sm:pb-4">
+                <button onclick="closePolicy()" class="w-full sm:w-auto bg-slate-200 hover:bg-slate-300 text-slate-800 px-6 py-2.5 sm:py-2 rounded-lg font-semibold transition-colors text-sm sm:text-base">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- --- TOAST NOTIFICATION --- -->
+    <div id="toast" class="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 z-[90] transition-all duration-300 transform translate-y-10 opacity-0 pointer-events-none">
+        <div class="bg-slate-900 text-white px-4 sm:px-5 py-3 rounded-lg shadow-2xl flex items-center justify-center sm:justify-start gap-3">
+            <i data-lucide="check-circle" class="text-green-400 flex-shrink-0 w-4 h-4 sm:w-5 sm:h-5"></i>
+            <p id="toast-msg" class="font-medium text-xs sm:text-sm text-center sm:text-left">Message</p>
+        </div>
+    </div>
+
+    <!-- --- ORDER SUCCESS MODAL --- -->
+    <div id="success-overlay" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+        <div id="success-modal" class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 sm:p-8 text-center transform scale-95 transition-transform duration-300">
+            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-5">
+                <i data-lucide="check" class="h-8 w-8 text-green-600"></i>
+            </div>
+            <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900 mb-2">Order Confirmed!</h3>
+            <p class="text-slate-500 text-sm mb-6">Thank you, <span id="success-name" class="font-bold text-slate-700"></span>. Your order has been successfully placed.</p>
+            <div class="bg-slate-50 border border-slate-100 rounded-xl p-4 mb-6 shadow-inner">
+                <p class="text-xs text-slate-500 uppercase tracking-wider mb-1 font-bold">Order Reference</p>
+                <p id="success-order-id" class="text-xl font-mono font-extrabold text-orange-600 tracking-widest"></p>
+                <p id="success-method" class="text-xs text-slate-500 mt-2 font-medium"></p>
+            </div>
+            <button onclick="closeSuccessModal()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl transition-colors shadow-lg">
+                Continue Shopping
+            </button>
+        </div>
+    </div>
+
+    <!-- --- JAVASCRIPT LOGIC --- -->
+    <script>
+        // Data
+        const INITIAL_BOOKS = [
+            { id: 1, title: "Introduction to Algorithms", author: "Thomas H. Cormen", price: 850.00, category: "Computer Science", course: "CSE 225", publisher: "MIT Press", rating: 4.8, stock: 15, authentic: true, image: "https://images.unsplash.com/photo-1516110833967-0b5716ca1387?w=400&q=80", description: "The definitive textbook on algorithms, widely used in university courses. Covers a broad range of algorithms in depth." },
+            { id: 2, title: "Principles of Marketing", author: "Philip Kotler", price: 650.50, category: "Business", course: "MKT 311", publisher: "Pearson", rating: 4.5, stock: 8, authentic: true, image: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&q=80", description: "Comprehensive introduction to marketing principles, consumer behavior, and modern market strategies." },
+            { id: 3, title: "The Pragmatic Programmer", author: "Andrew Hunt", price: 450.00, category: "Computer Science", course: "SWE 423", publisher: "Addison-Wesley", rating: 4.9, stock: 22, authentic: true, image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&q=80", description: "A masterclass in software engineering practices, coding standards, and professional development." },
+            { id: 4, title: "University Physics", author: "Young and Freedman", price: 950.00, category: "Engineering", course: "PHY 105", publisher: "Pearson", rating: 4.6, stock: 5, authentic: true, image: "https://images.unsplash.com/photo-1633158829585-23ba8f7c8caf?w=400&q=80", description: "Standard calculus-based physics textbook offering rigorous and detailed explanations of mechanics and electromagnetism." },
+            { id: 5, title: "To Kill a Mockingbird", author: "Harper Lee", price: 150.99, category: "Fiction", course: "ENG 201", publisher: "Harper Perennial", rating: 4.8, stock: 12, authentic: true, image: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=400&q=80", description: "A classic of modern American literature, exploring themes of racial injustice and loss of innocence." },
+            { id: 6, title: "Dune", author: "Frank Herbert", price: 220.50, category: "Sci-Fi", course: "Leisure", publisher: "Ace Books", rating: 4.7, stock: 4, authentic: true, image: "https://images.unsplash.com/photo-1526485856375-9110812fbf35?w=400&q=80", description: "A science fiction masterpiece set on the desert planet Arrakis. Essential reading for sci-fi enthusiasts." },
+            { id: 7, title: "Macroeconomics", author: "N. Gregory Mankiw", price: 750.00, category: "Business", course: "ECO 201", publisher: "Worth Publishers", rating: 4.4, stock: 18, authentic: true, image: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=400&q=80", description: "Clear, approachable explanations of macroeconomic concepts, national income, and monetary policy." },
+            { id: 8, title: "Clean Code", author: "Robert C. Martin", price: 420.00, category: "Computer Science", course: "CSE 305", publisher: "Prentice Hall", rating: 4.9, stock: 30, authentic: true, image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&q=80", description: "A handbook of agile software craftsmanship. Essential for writing readable, maintainable code." },
+            { id: 9, title: "Engineering Mechanics", author: "R. C. Hibbeler", price: 880.00, category: "Engineering", course: "CE 201", publisher: "Pearson", rating: 4.3, stock: 7, authentic: true, image: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=400&q=80", description: "Provides a clear and thorough presentation of the theory and application of engineering mechanics." },
+            { id: 10, title: "1984", author: "George Orwell", price: 145.50, category: "Fiction", course: "Leisure", publisher: "Signet Classic", rating: 4.8, stock: 45, authentic: true, image: "https://images.unsplash.com/photo-1535905557558-afc4877a26fc?w=400&q=80", description: "A dystopian social science fiction novel and cautionary tale about totalitarianism." },
+            { id: 11, title: "UIU Exam Master Kit", author: "Stationery", price: 120.00, category: "Supplies", course: "All Courses", publisher: "UIU Store", rating: 4.7, stock: 150, authentic: true, image: "https://images.unsplash.com/photo-1509869175650-a1d97972541a?w=400&q=80", description: "Everything you need for mid-terms and finals. Includes 2 ballpoint pens, 2 HB pencils, eraser, and standard OMR sheets." },
+            { id: 12, title: "Casio fx-991EX ClassWiz", author: "Casio", price: 1850.00, category: "Supplies", course: "Engineering/Math", publisher: "Casio", rating: 4.9, stock: 25, authentic: true, image: "https://images.unsplash.com/photo-1611125832047-1d7ad1e8e48f?w=400&q=80", description: "Advanced scientific calculator with high-resolution LCD display and natural textbook display." },
+            { id: 13, title: "Financial Accounting", author: "Weygandt, Kimmel, Kieso", price: 780.00, category: "Business", course: "ACT 111", publisher: "Wiley", rating: 4.6, stock: 14, authentic: true, image: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=400&q=80", description: "Provides students with a clear introduction to fundamental accounting concepts, with a focus on real-world examples." },
+            { id: 14, title: "Operating System Concepts", author: "Silberschatz, Galvin", price: 820.00, category: "Computer Science", course: "CSE 323", publisher: "Wiley", rating: 4.7, stock: 11, authentic: true, image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&q=80", description: "The classic 'Dinosaur book' covering all core operating system concepts, updated for modern environments." },
+            { id: 15, title: "Fundamentals of Electric Circuits", author: "Alexander, Sadiku", price: 890.00, category: "Engineering", course: "EEE 101", publisher: "McGraw Hill", rating: 4.5, stock: 18, authentic: true, image: "https://images.unsplash.com/photo-1562408590-e32931084e23?w=400&q=80", description: "A highly acclaimed text introducing electric circuit analysis in a clear and interesting manner." },
+            { id: 16, title: "Atomic Habits", author: "James Clear", price: 350.00, category: "Self-Help", course: "Leisure", publisher: "Penguin", rating: 4.9, stock: 35, authentic: true, image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&q=80", description: "No matter your goals, Atomic Habits offers a proven framework for improving--every day." },
+            { id: 17, title: "The Alchemist", author: "Paulo Coelho", price: 250.00, category: "Fiction", course: "Leisure", publisher: "HarperCollins", rating: 4.8, stock: 28, authentic: true, image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&q=80", description: "An inspiring modern classic about a young shepherd's journey to the pyramids of Egypt." },
+            { id: 18, title: "Artificial Intelligence: A Modern Approach", author: "Stuart Russell, Peter Norvig", price: 1150.00, category: "Computer Science", course: "CSE 425", publisher: "Pearson", rating: 4.8, stock: 6, authentic: true, image: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=400&q=80", description: "The most comprehensive, up-to-date introduction to the theory and practice of artificial intelligence." },
+            { id: 19, title: "Organizational Behavior", author: "Stephen P. Robbins", price: 720.00, category: "Business", course: "MGT 301", publisher: "Pearson", rating: 4.4, stock: 10, authentic: true, image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&q=80", description: "Comprehensive, research-based coverage of organizational behavior and human resource management." },
+            { id: 20, title: "UIU Premium Spiral Notebook", author: "Stationery", price: 150.00, category: "Supplies", course: "All Courses", publisher: "UIU Store", rating: 4.6, stock: 80, authentic: true, image: "https://images.unsplash.com/photo-1528716321680-815a8cdb8cbe?w=400&q=80", description: "200-page high-quality A4 spiral notebook with the UIU logo embossed on the cover." },
+            { id: 21, title: "White Lab Coat", author: "Apparel", price: 550.00, category: "Supplies", course: "Lab Courses", publisher: "UIU Store", rating: 4.7, stock: 20, authentic: true, image: "https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=400&q=80", description: "Standard white cotton lab coat required for all chemistry and biology lab sessions. Free size." },
+            { id: 22, title: "Microelectronic Circuits", author: "Adel S. Sedra", price: 980.00, category: "Engineering", course: "EEE 205", publisher: "Oxford", rating: 4.6, stock: 8, authentic: true, image: "https://images.unsplash.com/photo-1607743386760-88ac62b89b8a?w=400&q=80", description: "Thorough grounding in the fundamental concepts of electronic circuits and semiconductors." }
+        ];
+
+        const POLICIES = {
+            'return': `
+                <p>At UIU Bookshop, we guarantee the quality of our academic materials. If you are not satisfied, you may return items subject to the following conditions:</p>
+                <ul class="list-disc pl-4 sm:pl-5 space-y-1.5 sm:space-y-2 mt-2">
+                    <li><strong>Timeframe:</strong> Returns must be initiated within 3 days of pickup (BOPIS) or delivery.</li>
+                    <li><strong>Condition:</strong> Books must be unused, unmarked, and in original condition. Shrink-wrapped items must remain sealed.</li>
+                    <li><strong>Defective Items:</strong> Missing pages or printing errors are eligible for an immediate 1-to-1 replacement within 7 days.</li>
+                    <li><strong>Refund Process:</strong> Approved refunds will be credited back to your original payment method (bKash/Nagad/Card) within 3-5 business days. Cash on Delivery refunds can be collected at the campus store.</li>
+                </ul>`,
+            'privacy': `
+                <p>Your privacy is our priority. In alignment with the forthcoming Personal Data Protection (PDP) regulations of Bangladesh, we outline our data practices below:</p>
+                <h4 class="font-bold text-slate-900 mt-3 sm:mt-4 mb-1 sm:mb-2">Data Collection</h4>
+                <p>We collect your Name, UIU Student/Faculty ID, Contact Number, and Delivery Address solely for the purpose of order fulfillment and platform security.</p>
+                <h4 class="font-bold text-slate-900 mt-3 sm:mt-4 mb-1 sm:mb-2">Payment Security</h4>
+                <p>We do not store your MFS PINs or Credit Card numbers. All transactions are securely routed through certified payment gateways (e.g., SSLCOMMERZ, bKash API) utilizing end-to-end encryption.</p>
+                <h4 class="font-bold text-slate-900 mt-3 sm:mt-4 mb-1 sm:mb-2">Data Sharing</h4>
+                <p>Your data is never sold to third parties. Address and phone numbers are shared strictly with verified delivery partners (Pathao/RedX) for off-campus deliveries.</p>`,
+            'rights': `
+                <p>As a consumer in Bangladesh, your rights are protected under the <strong>Consumer Rights Protection Act, 2009</strong>.</p>
+                <p class="mt-2">UIU Bookshop guarantees:</p>
+                <ul class="list-disc pl-4 sm:pl-5 space-y-1.5 sm:space-y-2 mt-2">
+                    <li><strong>Right to Information:</strong> Accurate pricing, publisher details, and stock availability are clearly displayed.</li>
+                    <li><strong>Right to Authenticity:</strong> We enforce a strict anti-piracy policy. All verified textbooks are sourced directly from authorized publishers at Bangla Bazaar and international distributors.</li>
+                    <li><strong>Grievance Redressal:</strong> If an issue cannot be resolved by our campus support team, you retain the right to lodge a formal complaint with the Directorate of National Consumer Rights Protection (DNCRP).</li>
+                </ul>
+                <div class="bg-blue-50 border border-blue-200 text-blue-800 p-2.5 sm:p-3 rounded-lg mt-3 sm:mt-4 font-medium text-center sm:text-left">
+                    DNCRP Hotline: 16121 (Toll-Free in Bangladesh)
+                </div>`,
+            'dcog': `
+                <p>UIU Bookshop is fully compliant with the <strong>Digital Commerce Operations Guidelines, 2021 (DCOG-2021)</strong> issued by the Ministry of Commerce, Government of Bangladesh.</p>
+                <ul class="list-disc pl-4 sm:pl-5 space-y-1.5 sm:space-y-2 mt-2">
+                    <li><strong>Digital Business Identity (DBID):</strong> We are in the process of securing our e-CAB registered DBID, which will be prominently displayed on our platform.</li>
+                    <li><strong>Delivery Timelines:</strong> BOPIS orders are fulfilled within 24 hours. Off-campus deliveries within Dhaka are completed within the mandated 5-day window.</li>
+                    <li><strong>Payment Escrow:</strong> Advance payments made via MFS or cards are subject to Bangladesh Bank's escrow policies, ensuring funds are released to us only upon successful delivery.</li>
+                    <li><strong>Transparent Stock:</strong> We do not accept orders for "out of stock" items. Our inventory syncs in real-time to prevent ghost orders.</li>
+                </ul>`
+        };
+
+        // State
+        let books = [...INITIAL_BOOKS];
+        let cart = [];
+        let searchQuery = "";
+        let selectedCategory = "All";
+        let categories = ["All", ...new Set(books.map(b => b.category))];
+        
+        let deliveryMethod = "BOPIS";
+        let paymentMethod = "COD";
+        let currentCartStep = 1;
+
+        let toastTimeout;
+
+        // Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+            renderCategories();
+            renderBooks();
+            lucide.createIcons();
+            
+            // Search Listeners
+            document.getElementById('desktop-search').addEventListener('input', handleSearch);
+            document.getElementById('mobile-search').addEventListener('input', handleSearch);
+        });
+
+        // Search & Filter Logic
+        function handleSearch(e) {
+            searchQuery = e.target.value;
+            // Sync both search bars
+            document.getElementById('desktop-search').value = searchQuery;
+            document.getElementById('mobile-search').value = searchQuery;
+            renderBooks();
+            updateHeadersAndHero();
+        }
+
+        function setCategory(cat) {
+            selectedCategory = cat;
+            renderCategories(); // Update active pill styling
+            renderBooks();
+            updateHeadersAndHero();
+            if(document.getElementById('mobile-menu').classList.contains('block')) {
+                toggleMobileMenu();
+            }
+        }
+
+        function resetFilters() {
+            searchQuery = "";
+            selectedCategory = "All";
+            document.getElementById('desktop-search').value = "";
+            document.getElementById('mobile-search').value = "";
+            renderCategories();
+            renderBooks();
+            updateHeadersAndHero();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function updateHeadersAndHero() {
+            const isFiltered = searchQuery !== "" || selectedCategory !== "All";
+            
+            // Toggle Hero & Trust Banner
+            const hero = document.getElementById('hero-section');
+            const trust = document.getElementById('trust-banner');
+            if (isFiltered) {
+                hero.classList.add('hidden');
+                trust.classList.add('hidden');
+            } else {
+                hero.classList.remove('hidden');
+                trust.classList.remove('hidden');
+            }
+
+            // Update Titles
+            const title = searchQuery ? `Results for "${searchQuery}"` : selectedCategory === 'All' ? 'Our Collection' : `${selectedCategory}`;
+            document.getElementById('desktop-section-title').textContent = title + (searchQuery ? '' : ' Books');
+            document.getElementById('mobile-section-title').textContent = title;
+        }
+
+        function renderCategories() {
+            const html = categories.map(cat => `
+                <button onclick="setCategory('${cat}')" class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full sm:rounded-lg text-xs sm:text-sm font-medium transition-all ${
+                    selectedCategory === cat 
+                        ? 'bg-slate-800 text-white shadow-md' 
+                        : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                }">
+                    ${cat}
+                </button>
+            `).join('');
+            document.getElementById('desktop-categories').innerHTML = html;
+            document.getElementById('mobile-categories').innerHTML = html.replace(/sm:rounded-lg/g, ''); // Adjust mobile
+        }
+
+        function renderBooks() {
+            const grid = document.getElementById('books-grid');
+            const emptyState = document.getElementById('empty-state');
+            
+            const filtered = books.filter(b => {
+                const matchSearch = b.title.toLowerCase().includes(searchQuery.toLowerCase()) || b.author.toLowerCase().includes(searchQuery.toLowerCase());
+                const matchCat = selectedCategory === "All" || b.category === selectedCategory;
+                return matchSearch && matchCat;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                grid.innerHTML = filtered.map(book => `
+                    <div class="bg-white rounded-xl shadow-[0_2px_8px_-3px_rgba(0,0,0,0.08)] border border-slate-100 overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col h-full group">
+                        <div class="relative aspect-[3/4] overflow-hidden bg-slate-100 cursor-pointer" onclick="openQuickView(${book.id})">
+                            <img src="${book.image}" alt="${book.title}" class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500">
+                            <div class="absolute top-2 right-2 flex flex-col gap-1 sm:gap-2 items-end">
+                                <div class="bg-white/90 backdrop-blur-sm px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-md text-[10px] sm:text-xs font-bold text-slate-700 shadow-sm flex items-center gap-1">
+                                    <i data-lucide="star" class="text-amber-500 fill-amber-500 w-3 h-3"></i> ${book.rating}
+                                </div>
+                                ${book.authentic ? `
+                                <div class="bg-blue-50/90 backdrop-blur-sm px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-md text-[10px] sm:text-xs font-bold text-blue-700 shadow-sm flex items-center gap-1">
+                                    <i data-lucide="shield-check" class="text-blue-600 w-3 h-3"></i> <span class="hidden sm:inline">Verified</span>
+                                </div>` : ''}
+                            </div>
+                            <div class="absolute top-2 left-2 flex flex-col gap-2 items-start">
+                                <div class="bg-slate-900/80 backdrop-blur-sm text-white px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-md text-[9px] sm:text-xs font-medium shadow-sm">
+                                    ${book.category}
+                                </div>
+                            </div>
+                            <div class="hidden md:flex absolute inset-0 bg-slate-900/40 items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <button onclick="event.stopPropagation(); openQuickView(${book.id})" class="bg-white text-slate-900 flex items-center gap-2 px-4 py-2 rounded-full font-bold shadow-lg hover:bg-orange-500 hover:text-white transition-colors transform translate-y-4 group-hover:translate-y-0 duration-300">
+                                    <i data-lucide="info" class="w-4 h-4"></i> Quick View
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-3 sm:p-5 flex flex-col flex-1">
+                            <h3 class="font-bold text-sm sm:text-lg text-slate-900 line-clamp-2 mb-1 group-hover:text-orange-600 transition-colors cursor-pointer" onclick="openQuickView(${book.id})">${book.title}</h3>
+                            <p class="text-xs sm:text-sm text-slate-500 mb-2 line-clamp-1">${book.author}</p>
+                            <div class="mb-3">
+                                <span class="text-[10px] sm:text-xs font-semibold px-2 py-0.5 sm:py-1 rounded-full ${book.stock > 10 ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}">
+                                    ${book.stock} in stock
+                                </span>
+                            </div>
+                            <div class="mt-auto flex items-center justify-between">
+                                <span class="text-base sm:text-xl font-extrabold text-slate-900">৳${book.price.toFixed(0)}</span>
+                                <button onclick="addToCart(${book.id})" class="flex items-center justify-center bg-orange-50 text-orange-600 hover:bg-orange-500 hover:text-white p-2 sm:p-2.5 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2">
+                                    <i data-lucide="plus" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                lucide.createIcons(); // Re-initialize icons for new DOM
+            }
+        }
+
+        // Cart Drawer Logic
+        function goToCheckoutStep(step) {
+            currentCartStep = step;
+            const step1 = document.getElementById('checkout-step-1');
+            const step2 = document.getElementById('checkout-step-2');
+            const backBtn = document.getElementById('cart-back-btn');
+            const headerIcon = document.getElementById('cart-header-icon');
+            const headerTitle = document.getElementById('cart-header-title');
+            const clearBtn = document.getElementById('clear-cart-btn');
+            const countTitle = document.getElementById('cart-count-title');
+
+            if (step === 1) {
+                step1.classList.remove('hidden');
+                step1.classList.add('flex');
+                step2.classList.add('hidden');
+                step2.classList.remove('flex');
+                
+                backBtn.classList.add('hidden');
+                headerIcon.classList.remove('hidden');
+                headerTitle.textContent = "Your Cart";
+                
+                if(cart.length > 0) clearBtn.classList.remove('hidden');
+                countTitle.classList.remove('hidden');
+            } else {
+                step1.classList.add('hidden');
+                step1.classList.remove('flex');
+                step2.classList.remove('hidden');
+                step2.classList.add('flex');
+                
+                backBtn.classList.remove('hidden');
+                headerIcon.classList.add('hidden');
+                headerTitle.textContent = "Checkout";
+                
+                clearBtn.classList.add('hidden');
+                countTitle.classList.add('hidden');
+            }
+        }
+
+        // Cart Actions Logic
+        function addToCart(bookId) {
+            const book = books.find(b => b.id === bookId);
+            const existing = cart.find(i => i.id === bookId);
+            if (existing) {
+                existing.quantity += 1;
+            } else {
+                cart.push({ ...book, quantity: 1 });
+            }
+            renderCart();
+            showToast(`Added "${book.title}" to your cart`);
+            closeQuickView();
+        }
+
+        function updateQuantity(bookId, delta) {
+            const item = cart.find(i => i.id === bookId);
+            if (item) {
+                item.quantity += delta;
+                if (item.quantity <= 0) {
+                    cart = cart.filter(i => i.id !== bookId);
+                }
+            }
+            renderCart();
+            // If cart becomes empty while in checkout step 2, revert to step 1
+            if (cart.length === 0 && currentCartStep === 2) {
+                goToCheckoutStep(1);
+            }
+        }
+
+        function removeFromCart(bookId) {
+            cart = cart.filter(i => i.id !== bookId);
+            renderCart();
+            if (cart.length === 0 && currentCartStep === 2) {
+                goToCheckoutStep(1);
+            }
+        }
+
+        function clearCart() {
+            if(confirm("Are you sure you want to remove all items from your cart?")) {
+                cart = [];
+                renderCart();
+                showToast("Cart cleared");
+            }
+        }
+
+        function renderCart() {
+            const container = document.getElementById('cart-items');
+            const footer1 = document.getElementById('cart-step1-footer');
+            const badge = document.getElementById('cart-badge');
+            const clearBtn = document.getElementById('clear-cart-btn');
+            
+            const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById('cart-count-title').textContent = `${count} items`;
+            
+            if (count > 0) {
+                badge.textContent = count;
+                badge.classList.remove('hidden');
+                badge.classList.add('inline-flex');
+                if (currentCartStep === 1) clearBtn.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+                badge.classList.remove('inline-flex');
+                clearBtn.classList.add('hidden');
+            }
+
+            if (cart.length === 0) {
+                footer1.classList.add('hidden');
+                container.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-full flex-1 text-slate-500 space-y-4 pt-16 pb-10">
+                        <div class="p-6 bg-orange-50 rounded-full mb-2">
+                            <i data-lucide="shopping-bag" class="text-orange-300 w-12 h-12 sm:w-16 sm:h-16"></i>
+                        </div>
+                        <h3 class="text-lg sm:text-xl font-bold text-slate-700">Your cart is empty</h3>
+                        <p class="text-sm text-center text-slate-500 max-w-[200px]">Looks like you haven't added any books or supplies yet.</p>
+                        <button onclick="closeCart()" class="mt-4 bg-slate-900 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-slate-800 transition-colors text-sm sm:text-base shadow-md">
+                            Start Shopping
+                        </button>
+                    </div>
+                `;
+            } else {
+                footer1.classList.remove('hidden');
+                container.innerHTML = cart.map(item => `
+                    <div class="flex gap-3 sm:gap-4 bg-white p-3 sm:p-4 rounded-xl border border-slate-100 shadow-[0_2px_8px_-3px_rgba(0,0,0,0.06)] hover:shadow-md transition-shadow relative">
+                        <div class="h-20 w-14 sm:h-24 sm:w-16 flex-shrink-0 overflow-hidden rounded-md border border-slate-200 bg-slate-50">
+                            <img src="${item.image}" class="h-full w-full object-cover object-center">
+                        </div>
+                        <div class="flex flex-1 flex-col justify-between">
+                            <div>
+                                <div class="flex justify-between items-start text-sm sm:text-base font-medium text-slate-900 mb-1">
+                                    <h3 class="line-clamp-2 leading-tight pr-6 text-sm sm:text-base">${item.title}</h3>
+                                    <button onclick="removeFromCart(${item.id})" class="absolute top-3 right-3 text-slate-400 hover:text-red-500 transition-colors p-1.5 rounded-md hover:bg-red-50">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                                <p class="text-[10px] sm:text-xs text-slate-500 mb-3">${item.category}</p>
+                            </div>
+                            <div class="flex items-end justify-between text-sm mt-2">
+                                <div class="flex items-center border border-slate-200 rounded-lg bg-slate-50">
+                                    <button onclick="updateQuantity(${item.id}, -1)" class="p-1 sm:p-1.5 text-slate-500 hover:text-orange-500 hover:bg-slate-200 rounded-l-lg transition-colors"><i data-lucide="minus" class="w-3 h-3 sm:w-4 sm:h-4"></i></button>
+                                    <span class="w-6 sm:w-8 text-center font-bold text-slate-700 text-xs sm:text-sm">${item.quantity}</span>
+                                    <button onclick="updateQuantity(${item.id}, 1)" class="p-1 sm:p-1.5 text-slate-500 hover:text-orange-500 hover:bg-slate-200 rounded-r-lg transition-colors"><i data-lucide="plus" class="w-3 h-3 sm:w-4 sm:h-4"></i></button>
+                                </div>
+                                <p class="font-extrabold text-orange-600 text-base sm:text-lg">৳${(item.price * item.quantity).toFixed(0)}</p>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+                // Update Totals
+                const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                const shipping = deliveryMethod === 'DELIVERY' ? 60 : 0;
+                
+                document.getElementById('step1-subtotal').textContent = `৳${subtotal.toFixed(0)}`;
+                document.getElementById('cart-subtotal').textContent = `৳${subtotal.toFixed(0)}`;
+                document.getElementById('cart-shipping').textContent = shipping === 0 ? 'Free' : `৳${shipping}`;
+                document.getElementById('cart-total-price').textContent = `৳${(subtotal + shipping).toFixed(0)}`;
+            }
+            lucide.createIcons();
+        }
+
+        // Checkout Handlers
+        function updateDelivery(val) {
+            deliveryMethod = val;
+            
+            const bopis = document.getElementById('lbl-bopis');
+            const delivery = document.getElementById('lbl-delivery');
+            const addressField = document.getElementById('cust-address');
+
+            if (!bopis || !delivery || !addressField) return; // Failsafe
+
+            if(val === 'BOPIS') {
+                bopis.className = "flex items-center justify-between p-2.5 sm:p-3 border rounded-lg cursor-pointer transition-colors border-orange-500 bg-orange-50";
+                delivery.className = "flex items-center justify-between p-2.5 sm:p-3 border rounded-lg cursor-pointer transition-colors border-slate-200 bg-slate-50 hover:bg-slate-100";
+                addressField.classList.add('hidden');
+            } else {
+                bopis.className = "flex items-center justify-between p-2.5 sm:p-3 border rounded-lg cursor-pointer transition-colors border-slate-200 bg-slate-50 hover:bg-slate-100";
+                delivery.className = "flex items-center justify-between p-2.5 sm:p-3 border rounded-lg cursor-pointer transition-colors border-orange-500 bg-orange-50";
+                addressField.classList.remove('hidden');
+            }
+            renderCart(); // recalculate shipping
+        }
+
+        function updatePayment(val) {
+            paymentMethod = val;
+            const cod = document.getElementById('lbl-cod');
+            const bkash = document.getElementById('lbl-bkash');
+
+            if (!cod || !bkash) return; // Failsafe to prevent crashing
+
+            const codIcon = cod.querySelector('svg, i');
+            const codSpan = cod.querySelector('span');
+            const bkashIcon = bkash.querySelector('svg, i');
+            const bkashSpan = bkash.querySelector('span');
+
+            if(val === 'COD') {
+                cod.className = "flex flex-col items-center justify-center p-3 sm:p-4 border rounded-lg cursor-pointer transition-colors text-center border-orange-500 bg-orange-50";
+                if(codIcon) codIcon.setAttribute('class', "lucide lucide-map-pin w-5 h-5 sm:w-6 sm:h-6 text-orange-500 mb-1.5");
+                if(codSpan) codSpan.className = "text-[10px] sm:text-xs font-bold text-orange-700";
+                
+                bkash.className = "flex flex-col items-center justify-center p-3 sm:p-4 border rounded-lg cursor-pointer transition-colors text-center border-slate-200 bg-slate-50 hover:bg-slate-100";
+                if(bkashIcon) bkashIcon.setAttribute('class', "lucide lucide-credit-card w-5 h-5 sm:w-6 sm:h-6 text-slate-400 mb-1.5");
+                if(bkashSpan) bkashSpan.className = "text-[10px] sm:text-xs font-bold text-slate-600";
+            } else {
+                cod.className = "flex flex-col items-center justify-center p-3 sm:p-4 border rounded-lg cursor-pointer transition-colors text-center border-slate-200 bg-slate-50 hover:bg-slate-100";
+                if(codIcon) codIcon.setAttribute('class', "lucide lucide-map-pin w-5 h-5 sm:w-6 sm:h-6 text-slate-400 mb-1.5");
+                if(codSpan) codSpan.className = "text-[10px] sm:text-xs font-bold text-slate-600";
+                
+                bkash.className = "flex flex-col items-center justify-center p-3 sm:p-4 border rounded-lg cursor-pointer transition-colors text-center border-pink-500 bg-pink-50";
+                if(bkashIcon) bkashIcon.setAttribute('class', "lucide lucide-credit-card w-5 h-5 sm:w-6 sm:h-6 text-pink-600 mb-1.5");
+                if(bkashSpan) bkashSpan.className = "text-[10px] sm:text-xs font-bold text-pink-700";
+            }
+        }
+
+        function clearError(element) {
+            element.classList.remove('border-red-500', 'ring-red-500', 'bg-red-50');
+            element.classList.add('border-slate-200', 'bg-slate-50');
+        }
+
+        function handleCheckout() {
+            const nameEl = document.getElementById('cust-name');
+            const idEl = document.getElementById('cust-id');
+            const phoneEl = document.getElementById('cust-phone');
+            const addressEl = document.getElementById('cust-address');
+
+            let isValid = true;
+            
+            // Validate required fields
+            [nameEl, idEl, phoneEl].forEach(el => {
+                if(!el.value.trim()) {
+                    el.classList.remove('border-slate-200', 'bg-slate-50');
+                    el.classList.add('border-red-500', 'ring-red-500', 'bg-red-50');
+                    isValid = false;
+                }
+            });
+
+            if(deliveryMethod === 'DELIVERY' && !addressEl.value.trim()) {
+                addressEl.classList.remove('border-slate-200', 'bg-slate-50');
+                addressEl.classList.add('border-red-500', 'ring-red-500', 'bg-red-50');
+                isValid = false;
+            }
+
+            if(!isValid) {
+                showToast("⚠️ Please fill in all required customer details.");
+                return;
+            }
+
+            // Generate Mock Order ID
+            const orderId = 'UIU-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+            
+            // Populate Success Modal
+            document.getElementById('success-name').textContent = nameEl.value.trim().split(' ')[0]; // First name
+            document.getElementById('success-order-id').textContent = orderId;
+            document.getElementById('success-method').textContent = `${paymentMethod === 'COD' ? 'Cash on Delivery' : 'Digital Payment'} • ${deliveryMethod === 'BOPIS' ? 'Campus Pickup' : 'Home Delivery'}`;
+
+            // Show Success Modal
+            document.getElementById('success-overlay').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('success-overlay').classList.remove('opacity-0');
+                document.getElementById('success-modal').classList.remove('scale-95');
+                document.getElementById('success-modal').classList.add('scale-100');
+            }, 10);
+            
+            // Close Cart Drawer (keep body locked because success modal is open)
+            document.getElementById('cart-overlay').classList.add('opacity-0');
+            document.getElementById('cart-drawer').classList.add('translate-x-full');
+            setTimeout(() => {
+                document.getElementById('cart-overlay').classList.add('hidden');
+            }, 300);
+
+            // Clear Cart and Form State
+            cart = [];
+            goToCheckoutStep(1);
+            renderCart();
+            nameEl.value = '';
+            idEl.value = '';
+            phoneEl.value = '';
+            addressEl.value = '';
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('success-overlay').classList.add('opacity-0');
+            document.getElementById('success-modal').classList.remove('scale-100');
+            document.getElementById('success-modal').classList.add('scale-95');
+            setTimeout(() => {
+                document.getElementById('success-overlay').classList.add('hidden');
+                toggleBodyScroll(false); // Finally unlock body scrolling
+            }, 300);
+        }
+
+        // Drawers & Modals
+        function toggleBodyScroll(lock) {
+            document.body.style.overflow = lock ? 'hidden' : '';
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            const icon = document.getElementById('mobile-menu-icon');
+            if (menu.classList.contains('hidden')) {
+                menu.classList.remove('hidden');
+                menu.classList.add('block');
+                icon.setAttribute('data-lucide', 'x');
+            } else {
+                menu.classList.remove('block');
+                menu.classList.add('hidden');
+                icon.setAttribute('data-lucide', 'menu');
+            }
+            lucide.createIcons();
+        }
+
+        function openCart() {
+            goToCheckoutStep(1); // Always default to step 1 when opening
+            document.getElementById('cart-overlay').classList.remove('hidden');
+            // small delay for transition
+            setTimeout(() => {
+                document.getElementById('cart-overlay').classList.remove('opacity-0');
+                document.getElementById('cart-drawer').classList.remove('translate-x-full');
+            }, 10);
+            toggleBodyScroll(true);
+            renderCart();
+        }
+
+        function closeCart() {
+            document.getElementById('cart-overlay').classList.add('opacity-0');
+            document.getElementById('cart-drawer').classList.add('translate-x-full');
+            setTimeout(() => {
+                document.getElementById('cart-overlay').classList.add('hidden');
+            }, 300);
+            toggleBodyScroll(false);
+        }
+
+        function openQuickView(id) {
+            const book = books.find(b => b.id === id);
+            if(!book) return;
+
+            document.getElementById('qv-img').src = book.image;
+            document.getElementById('qv-cat').textContent = book.category;
+            document.getElementById('qv-course').textContent = book.course ? `Course: ${book.course}` : '';
+            document.getElementById('qv-title').textContent = book.title;
+            document.getElementById('qv-author').textContent = book.author;
+            document.getElementById('qv-rating').textContent = book.rating;
+            document.getElementById('qv-desc').textContent = book.description;
+            document.getElementById('qv-pub').textContent = book.publisher;
+            document.getElementById('qv-stock').textContent = `${book.stock} in stock`;
+            document.getElementById('qv-price').textContent = `৳${book.price.toFixed(0)}`;
+            
+            const authBadge = document.getElementById('qv-auth-badge');
+            if(book.authentic) {
+                authBadge.classList.remove('hidden');
+                authBadge.classList.add('flex');
+            } else {
+                authBadge.classList.add('hidden');
+                authBadge.classList.remove('flex');
+            }
+
+            // Bind add to cart button
+            const addBtn = document.getElementById('qv-add-btn');
+            addBtn.onclick = () => addToCart(book.id);
+
+            document.getElementById('qv-overlay').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('qv-modal').classList.remove('translate-y-full');
+            }, 10);
+            toggleBodyScroll(true);
+        }
+
+        function closeQuickView() {
+            document.getElementById('qv-modal').classList.add('translate-y-full');
+            setTimeout(() => {
+                document.getElementById('qv-overlay').classList.add('hidden');
+            }, 300);
+            toggleBodyScroll(false);
+        }
+
+        function openPolicy(type) {
+            let title = "";
+            if (type === 'return') title = "Return & Refund Policy";
+            else if (type === 'privacy') title = "Privacy Notice";
+            else if (type === 'rights') title = "Consumer Rights";
+            else if (type === 'dcog') title = "DCOG-2021 Compliance";
+
+            document.getElementById('policy-title').textContent = title;
+            document.getElementById('policy-content').innerHTML = POLICIES[type];
+
+            document.getElementById('policy-overlay').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('policy-modal').classList.remove('translate-y-full');
+            }, 10);
+            toggleBodyScroll(true);
+        }
+
+        function closePolicy() {
+            document.getElementById('policy-modal').classList.add('translate-y-full');
+            setTimeout(() => {
+                document.getElementById('policy-overlay').classList.add('hidden');
+            }, 300);
+            toggleBodyScroll(false);
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').textContent = msg;
+            
+            toast.classList.remove('translate-y-10', 'opacity-0', 'pointer-events-none');
+            
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.add('translate-y-10', 'opacity-0', 'pointer-events-none');
+            }, 3000);
+        }
+
+    </script>
+</body>
+</html>

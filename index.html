@@ -11,6 +11,9 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
+    <!-- jsPDF for Receipt Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
     <style>
         /* Hide scrollbar for clean UI in cart/modals but keep functionality */
         .no-scrollbar::-webkit-scrollbar {
@@ -37,7 +40,7 @@
                 </div>
 
                 <!-- Desktop Search -->
-                <div class="hidden md:flex flex-1 max-w-md mx-8 relative">
+                <div class="hidden md:flex flex-1 max-w-md mx-8 relative" id="nav-search-container">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <i data-lucide="search" class="h-5 w-5 text-slate-400"></i>
                     </div>
@@ -45,7 +48,7 @@
                 </div>
 
                 <!-- Actions -->
-                <div class="flex items-center gap-2 sm:gap-4">
+                <div class="flex items-center gap-2 sm:gap-4" id="nav-actions-container">
                     <button class="relative p-2 text-slate-600 hover:text-orange-500 transition-colors focus:outline-none" onclick="openCart()">
                         <i data-lucide="shopping-cart" class="w-6 h-6"></i>
                         <span id="cart-badge" class="hidden absolute top-0 right-0 items-center justify-center px-1.5 py-0.5 text-[10px] sm:text-xs font-bold leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-orange-500 rounded-full">
@@ -75,92 +78,151 @@
         </div>
     </nav>
 
-    <!-- --- HERO SECTION --- -->
-    <div id="hero-section" class="bg-slate-900 text-white relative overflow-hidden transition-all duration-300">
-        <div class="absolute inset-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80&w=2000')] bg-cover bg-center mix-blend-overlay"></div>
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 py-12 md:py-24">
-            <div class="md:w-2/3">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/20 text-orange-400 text-xs sm:text-sm font-medium mb-4 sm:mb-6 border border-orange-500/30">
-                    <i data-lucide="map-pin" class="w-4 h-4"></i> Same-day Campus Pickup
+    <!-- WRAPPER FOR STOREFRONT (Hidden when Admin is active) -->
+    <div id="store-view">
+        <!-- --- HERO SECTION --- -->
+        <div id="hero-section" class="bg-slate-900 text-white relative overflow-hidden transition-all duration-300">
+            <div class="absolute inset-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80&w=2000')] bg-cover bg-center mix-blend-overlay"></div>
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 py-12 md:py-24">
+                <div class="md:w-2/3">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/20 text-orange-400 text-xs sm:text-sm font-medium mb-4 sm:mb-6 border border-orange-500/30">
+                        <i data-lucide="map-pin" class="w-4 h-4"></i> Same-day Campus Pickup
+                    </div>
+                    <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-3 sm:mb-4">
+                        Empower Your Mind with <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-300">UIU Bookshop</span>
+                    </h1>
+                    <p class="text-base sm:text-lg md:text-xl text-slate-300 mb-6 sm:mb-8 max-w-2xl">
+                        For UIU students who must collect course books and exam supplies on tight deadlines, our digital brick-and-click shop guarantees same-day pickup.
+                    </p>
+                    <div class="flex flex-wrap gap-4">
+                        <button onclick="document.getElementById('books-section').scrollIntoView({ behavior: 'smooth' })" class="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 sm:px-6 sm:py-3 rounded-lg font-semibold transition-colors flex items-center gap-2 shadow-lg shadow-orange-500/30 text-sm sm:text-base w-full sm:w-auto justify-center">
+                            Browse Catalog <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                        </button>
+                    </div>
                 </div>
-                <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-3 sm:mb-4">
-                    Empower Your Mind with <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-300">UIU Bookshop</span>
-                </h1>
-                <p class="text-base sm:text-lg md:text-xl text-slate-300 mb-6 sm:mb-8 max-w-2xl">
-                    For UIU students who must collect course books and exam supplies on tight deadlines, our digital brick-and-click shop guarantees same-day pickup.
-                </p>
-                <div class="flex flex-wrap gap-4">
-                    <button onclick="document.getElementById('books-section').scrollIntoView({ behavior: 'smooth' })" class="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 sm:px-6 sm:py-3 rounded-lg font-semibold transition-colors flex items-center gap-2 shadow-lg shadow-orange-500/30 text-sm sm:text-base w-full sm:w-auto justify-center">
-                        Browse Catalog <i data-lucide="chevron-right" class="w-5 h-5"></i>
-                    </button>
+            </div>
+        </div>
+
+        <!-- --- TRUST BANNER --- -->
+        <div id="trust-banner" class="bg-white border-b border-slate-200 shadow-sm relative z-20 transition-all duration-300">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 divide-y md:divide-y-0 md:divide-x divide-slate-100 text-left">
+                    <div class="flex items-center gap-3 md:gap-4 pt-2 md:pt-0 md:px-6">
+                        <div class="bg-blue-50 text-blue-600 p-2 sm:p-3 rounded-full flex-shrink-0"><i data-lucide="shield-check" class="w-5 h-5 sm:w-6 sm:h-6"></i></div>
+                        <div>
+                            <h3 class="font-bold text-slate-900 text-xs sm:text-sm">100% Authentic Books</h3>
+                            <p class="text-[10px] sm:text-xs text-slate-500">Direct from verified publishers</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 md:gap-4 pt-4 md:pt-0 md:px-6">
+                        <div class="bg-green-50 text-green-600 p-2 sm:p-3 rounded-full flex-shrink-0"><i data-lucide="clock" class="w-5 h-5 sm:w-6 sm:h-6"></i></div>
+                        <div>
+                            <h3 class="font-bold text-slate-900 text-xs sm:text-sm">2-Hour Campus BOPIS</h3>
+                            <p class="text-[10px] sm:text-xs text-slate-500">Buy online, pick up at UIU</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 md:gap-4 pt-4 md:pt-0 md:px-6">
+                        <div class="bg-orange-50 text-orange-600 p-2 sm:p-3 rounded-full flex-shrink-0"><i data-lucide="credit-card" class="w-5 h-5 sm:w-6 sm:h-6"></i></div>
+                        <div>
+                            <h3 class="font-bold text-slate-900 text-xs sm:text-sm">Seamless Payments</h3>
+                            <p class="text-[10px] sm:text-xs text-slate-500">bKash, Nagad, or COD</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- --- MAIN CONTENT --- -->
+        <main id="books-section" class="flex-1 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8 w-full">
+            
+            <!-- Category Filters (Desktop) -->
+            <div class="hidden md:flex items-center justify-between mb-8 pb-4 border-b border-slate-200">
+                <h2 id="desktop-section-title" class="text-2xl font-bold text-slate-800">Our Collection</h2>
+                <div id="desktop-categories" class="flex gap-2">
+                    <!-- Categories injected here -->
+                </div>
+            </div>
+
+            <!-- Mobile Header Equivalent -->
+            <div class="md:hidden mb-4 px-1">
+                <h2 id="mobile-section-title" class="text-lg font-bold text-slate-800">Our Collection</h2>
+            </div>
+
+            <!-- Book Grid -->
+            <div id="books-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
+                <!-- Books injected here -->
+            </div>
+
+            <!-- Empty State (Hidden by default) -->
+            <div id="empty-state" class="hidden text-center py-16 sm:py-24 bg-white rounded-2xl border border-slate-100 shadow-sm mx-1">
+                <i data-lucide="book-open" class="mx-auto text-slate-300 mb-4 w-10 h-10 sm:w-12 sm:h-12"></i>
+                <h3 class="text-lg sm:text-xl font-bold text-slate-700 mb-2">No items found</h3>
+                <p class="text-sm sm:text-base text-slate-500">Try adjusting your search or filter criteria.</p>
+                <button onclick="resetFilters()" class="mt-6 text-orange-500 hover:text-orange-600 font-medium underline text-sm sm:text-base">
+                    Clear all filters
+                </button>
+            </div>
+        </main>
+    </div> <!-- END STORE VIEW WRAPPER -->
+
+    <!-- ================== ADMIN VIEW ================== -->
+    <div id="admin-view" class="hidden flex-1 w-full bg-slate-50 pb-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 border-b border-slate-200 pb-6">
+                <div>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Admin Dashboard</h2>
+                    <p class="text-slate-500 text-sm mt-1">Manage live orders and platform metrics.</p>
+                </div>
+                <button onclick="toggleAdmin()" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-5 py-2.5 rounded-lg font-bold shadow-sm transition-colors flex items-center gap-2 text-sm">
+                    <i data-lucide="store" class="w-4 h-4"></i> Back to Store
+                </button>
+            </div>
+
+            <!-- Admin Stats -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+                <div class="bg-white p-6 rounded-xl border border-slate-100 shadow-sm flex items-center gap-4">
+                    <div class="bg-blue-50 text-blue-600 p-3 rounded-lg"><i data-lucide="shopping-bag" class="w-6 h-6"></i></div>
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Orders</p>
+                        <p id="admin-stat-total" class="text-2xl font-extrabold text-slate-900">0</p>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl border border-slate-100 shadow-sm flex items-center gap-4">
+                    <div class="bg-amber-50 text-amber-600 p-3 rounded-lg"><i data-lucide="clock" class="w-6 h-6"></i></div>
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Pending Processing</p>
+                        <p id="admin-stat-pending" class="text-2xl font-extrabold text-slate-900">0</p>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl border border-slate-100 shadow-sm flex items-center gap-4">
+                    <div class="bg-green-50 text-green-600 p-3 rounded-lg"><i data-lucide="bar-chart-3" class="w-6 h-6"></i></div>
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Revenue</p>
+                        <p id="admin-stat-revenue" class="text-2xl font-extrabold text-slate-900">৳0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Orders List -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-100 bg-slate-50 flex items-center gap-2">
+                    <i data-lucide="list-ordered" class="w-5 h-5 text-slate-500"></i>
+                    <h3 class="font-bold text-slate-800">Recent Orders</h3>
+                </div>
+                <div id="admin-orders-list" class="divide-y divide-slate-100">
+                    <!-- Injected via Firebase Listener -->
+                    <div class="p-12 text-center text-slate-400">
+                        <i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto mb-3 text-orange-500"></i>
+                        <p>Connecting to secure database...</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- --- TRUST BANNER --- -->
-    <div id="trust-banner" class="bg-white border-b border-slate-200 shadow-sm relative z-20 transition-all duration-300">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 divide-y md:divide-y-0 md:divide-x divide-slate-100 text-left">
-                <div class="flex items-center gap-3 md:gap-4 pt-2 md:pt-0 md:px-6">
-                    <div class="bg-blue-50 text-blue-600 p-2 sm:p-3 rounded-full flex-shrink-0"><i data-lucide="shield-check" class="w-5 h-5 sm:w-6 sm:h-6"></i></div>
-                    <div>
-                        <h3 class="font-bold text-slate-900 text-xs sm:text-sm">100% Authentic Books</h3>
-                        <p class="text-[10px] sm:text-xs text-slate-500">Direct from verified publishers</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-3 md:gap-4 pt-4 md:pt-0 md:px-6">
-                    <div class="bg-green-50 text-green-600 p-2 sm:p-3 rounded-full flex-shrink-0"><i data-lucide="clock" class="w-5 h-5 sm:w-6 sm:h-6"></i></div>
-                    <div>
-                        <h3 class="font-bold text-slate-900 text-xs sm:text-sm">2-Hour Campus BOPIS</h3>
-                        <p class="text-[10px] sm:text-xs text-slate-500">Buy online, pick up at UIU</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-3 md:gap-4 pt-4 md:pt-0 md:px-6">
-                    <div class="bg-orange-50 text-orange-600 p-2 sm:p-3 rounded-full flex-shrink-0"><i data-lucide="credit-card" class="w-5 h-5 sm:w-6 sm:h-6"></i></div>
-                    <div>
-                        <h3 class="font-bold text-slate-900 text-xs sm:text-sm">Seamless Payments</h3>
-                        <p class="text-[10px] sm:text-xs text-slate-500">bKash, Nagad, or COD</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- --- MAIN CONTENT --- -->
-    <main id="books-section" class="flex-1 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8 w-full">
-        
-        <!-- Category Filters (Desktop) -->
-        <div class="hidden md:flex items-center justify-between mb-8 pb-4 border-b border-slate-200">
-            <h2 id="desktop-section-title" class="text-2xl font-bold text-slate-800">Our Collection</h2>
-            <div id="desktop-categories" class="flex gap-2">
-                <!-- Categories injected here -->
-            </div>
-        </div>
-
-        <!-- Mobile Header Equivalent -->
-        <div class="md:hidden mb-4 px-1">
-            <h2 id="mobile-section-title" class="text-lg font-bold text-slate-800">Our Collection</h2>
-        </div>
-
-        <!-- Book Grid -->
-        <div id="books-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
-            <!-- Books injected here -->
-        </div>
-
-        <!-- Empty State (Hidden by default) -->
-        <div id="empty-state" class="hidden text-center py-16 sm:py-24 bg-white rounded-2xl border border-slate-100 shadow-sm mx-1">
-            <i data-lucide="book-open" class="mx-auto text-slate-300 mb-4 w-10 h-10 sm:w-12 sm:h-12"></i>
-            <h3 class="text-lg sm:text-xl font-bold text-slate-700 mb-2">No items found</h3>
-            <p class="text-sm sm:text-base text-slate-500">Try adjusting your search or filter criteria.</p>
-            <button onclick="resetFilters()" class="mt-6 text-orange-500 hover:text-orange-600 font-medium underline text-sm sm:text-base">
-                Clear all filters
-            </button>
-        </div>
-    </main>
+    <!-- ============================================== -->
 
     <!-- --- FOOTER --- -->
-    <footer class="bg-slate-900 text-slate-400 py-10 sm:py-12 mt-8 sm:mt-12 border-t border-slate-800">
+    <footer class="bg-slate-900 text-slate-400 py-10 sm:py-12 border-t border-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
             <div class="col-span-1 md:col-span-2">
                 <div class="flex items-center gap-2 mb-4">
@@ -197,6 +259,11 @@
         </div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 pt-6 border-t border-slate-800 text-xs sm:text-sm text-center md:text-left flex flex-col md:flex-row justify-between items-center">
             <p>&copy; <span id="current-year"></span> UIU Bookshop. All rights reserved.</p>
+            <div class="mt-4 md:mt-0 flex gap-4">
+                <button onclick="openAdminLogin()" class="text-slate-500 hover:text-white transition-colors focus:outline-none">
+                    <i data-lucide="lock" class="w-4 h-4 inline-block align-text-bottom mr-1"></i>Admin Access
+                </button>
+            </div>
         </div>
     </footer>
 
@@ -305,7 +372,7 @@
                         <input type="text" id="cust-name" placeholder="Full Name *" oninput="clearError(this)" class="w-full border border-slate-200 p-2.5 sm:p-3 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-slate-50 transition-colors placeholder-slate-400">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                             <input type="text" id="cust-id" placeholder="UIU ID *" oninput="clearError(this)" class="w-full border border-slate-200 p-2.5 sm:p-3 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-slate-50 transition-colors placeholder-slate-400">
-                            <input type="tel" id="cust-phone" placeholder="Phone Number *" oninput="clearError(this)" class="w-full border border-slate-200 p-2.5 sm:p-3 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-slate-50 transition-colors placeholder-slate-400">
+                            <input type="tel" id="cust-phone" maxlength="11" placeholder="Phone Number *" oninput="this.value = this.value.replace(/[^0-9]/g, ''); clearError(this)" class="w-full border border-slate-200 p-2.5 sm:p-3 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-slate-50 transition-colors placeholder-slate-400">
                         </div>
                         <textarea id="cust-address" placeholder="Complete Delivery Address *" rows="2" oninput="clearError(this)" class="hidden w-full border border-slate-200 p-2.5 sm:p-3 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none bg-slate-50 transition-colors placeholder-slate-400"></textarea>
                     </div>
@@ -331,7 +398,7 @@
                 </div>
 
                 <div class="mt-2 sm:mt-4">
-                    <button onclick="handleCheckout()" class="w-full flex items-center justify-center rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 px-4 sm:px-6 py-3.5 sm:py-4 text-sm sm:text-base font-bold text-white shadow-lg shadow-orange-500/30 hover:from-orange-600 hover:to-orange-700 transition-all transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2">
+                    <button id="btn-submit-order" onclick="handleCheckout()" class="w-full flex items-center justify-center rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 px-4 sm:px-6 py-3.5 sm:py-4 text-sm sm:text-base font-bold text-white shadow-lg shadow-orange-500/30 hover:from-orange-600 hover:to-orange-700 transition-all transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2">
                         <i data-lucide="lock" class="w-4 h-4 mr-2"></i> Confirm Order
                     </button>
                 </div>
@@ -448,11 +515,73 @@
             <button onclick="closeSuccessModal()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl transition-colors shadow-lg">
                 Continue Shopping
             </button>
+            <button onclick="downloadReceipt()" class="w-full mt-3 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold py-3.5 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2">
+                <i data-lucide="download" class="w-4 h-4"></i> Download PDF Receipt
+            </button>
         </div>
     </div>
 
-    <!-- --- JAVASCRIPT LOGIC --- -->
-    <script>
+    <!-- --- ADMIN LOGIN MODAL --- -->
+    <div id="admin-login-overlay" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+        <div id="admin-login-modal" class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 sm:p-8 transform scale-95 transition-transform duration-300">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-extrabold text-slate-900 flex items-center gap-2">
+                    <i data-lucide="lock" class="w-5 h-5 text-orange-500"></i> Admin Login
+                </h3>
+                <button onclick="closeAdminLogin()" class="text-slate-400 hover:text-slate-600 transition-colors focus:outline-none">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <p class="text-slate-500 text-sm mb-5">Please enter the administrator credentials to access the dashboard.</p>
+            
+            <div class="space-y-3 mb-5">
+                <input type="text" id="admin-userid" placeholder="Enter Admin ID (admin)" class="w-full border border-slate-200 p-3 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-slate-50 transition-colors">
+                <input type="password" id="admin-password" placeholder="Enter Password (uiu2026)" onkeypress="if(event.key === 'Enter') verifyAdminPassword()" class="w-full border border-slate-200 p-3 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-slate-50 transition-colors">
+            </div>
+            <button onclick="verifyAdminPassword()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-xl transition-colors shadow-lg flex items-center justify-center gap-2">
+                Login to Dashboard
+            </button>
+        </div>
+    </div>
+
+    <!-- --- JAVASCRIPT LOGIC WITH FIREBASE BACKEND --- -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase Initialization
+        let app, auth, db, appId, user;
+        try {
+            const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        } catch(e) {
+            console.warn("Firebase execution environment not available. Running in local mode.");
+        }
+
+        // Auth Flow
+        if (auth) {
+            const initAuth = async () => {
+                try {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch(e) {
+                    console.error("Auth Failed", e);
+                }
+            };
+            initAuth();
+            onAuthStateChanged(auth, (u) => { 
+                user = u; 
+                if(user && isAdminActive) setupAdminListener();
+            });
+        }
+
         // Data
         const INITIAL_BOOKS = [
             { id: 1, title: "Introduction to Algorithms", author: "Thomas H. Cormen", price: 850.00, category: "Computer Science", course: "CSE 225", publisher: "MIT Press", rating: 4.8, stock: 15, authentic: true, image: "https://images.unsplash.com/photo-1516110833967-0b5716ca1387?w=400&q=80", description: "The definitive textbook on algorithms, widely used in university courses. Covers a broad range of algorithms in depth." },
@@ -517,7 +646,7 @@
                 </ul>`
         };
 
-        // State
+        // UI State
         let books = [...INITIAL_BOOKS];
         let cart = [];
         let searchQuery = "";
@@ -528,7 +657,37 @@
         let paymentMethod = "COD";
         let currentCartStep = 1;
 
+        let isAdminActive = false;
+        let adminUnsubscribe = null;
+        let allOrders = [];
         let toastTimeout;
+
+        // Ensure global access for inline onclick attributes
+        window.resetFilters = resetFilters;
+        window.openCart = openCart;
+        window.closeCart = closeCart;
+        window.toggleMobileMenu = toggleMobileMenu;
+        window.setCategory = setCategory;
+        window.openPolicy = openPolicy;
+        window.closePolicy = closePolicy;
+        window.updateDelivery = updateDelivery;
+        window.updatePayment = updatePayment;
+        window.clearError = clearError;
+        window.handleCheckout = handleCheckout;
+        window.goToCheckoutStep = goToCheckoutStep;
+        window.clearCart = clearCart;
+        window.openQuickView = openQuickView;
+        window.closeQuickView = closeQuickView;
+        window.closeSuccessModal = closeSuccessModal;
+        window.updateQuantity = updateQuantity;
+        window.removeFromCart = removeFromCart;
+        window.addToCart = addToCart;
+        window.toggleAdmin = toggleAdmin;
+        window.updateOrderStatus = updateOrderStatus;
+        window.openAdminLogin = openAdminLogin;
+        window.closeAdminLogin = closeAdminLogin;
+        window.verifyAdminPassword = verifyAdminPassword;
+        window.downloadReceipt = downloadReceipt;
 
         // Initialization
         document.addEventListener('DOMContentLoaded', () => {
@@ -545,7 +704,6 @@
         // Search & Filter Logic
         function handleSearch(e) {
             searchQuery = e.target.value;
-            // Sync both search bars
             document.getElementById('desktop-search').value = searchQuery;
             document.getElementById('mobile-search').value = searchQuery;
             renderBooks();
@@ -554,7 +712,7 @@
 
         function setCategory(cat) {
             selectedCategory = cat;
-            renderCategories(); // Update active pill styling
+            renderCategories();
             renderBooks();
             updateHeadersAndHero();
             if(document.getElementById('mobile-menu').classList.contains('block')) {
@@ -575,8 +733,6 @@
 
         function updateHeadersAndHero() {
             const isFiltered = searchQuery !== "" || selectedCategory !== "All";
-            
-            // Toggle Hero & Trust Banner
             const hero = document.getElementById('hero-section');
             const trust = document.getElementById('trust-banner');
             if (isFiltered) {
@@ -587,7 +743,6 @@
                 trust.classList.remove('hidden');
             }
 
-            // Update Titles
             const title = searchQuery ? `Results for "${searchQuery}"` : selectedCategory === 'All' ? 'Our Collection' : `${selectedCategory}`;
             document.getElementById('desktop-section-title').textContent = title + (searchQuery ? '' : ' Books');
             document.getElementById('mobile-section-title').textContent = title;
@@ -604,7 +759,7 @@
                 </button>
             `).join('');
             document.getElementById('desktop-categories').innerHTML = html;
-            document.getElementById('mobile-categories').innerHTML = html.replace(/sm:rounded-lg/g, ''); // Adjust mobile
+            document.getElementById('mobile-categories').innerHTML = html.replace(/sm:rounded-lg/g, ''); 
         }
 
         function renderBooks() {
@@ -663,7 +818,7 @@
                         </div>
                     </div>
                 `).join('');
-                lucide.createIcons(); // Re-initialize icons for new DOM
+                lucide.createIcons(); 
             }
         }
 
@@ -728,7 +883,6 @@
                 }
             }
             renderCart();
-            // If cart becomes empty while in checkout step 2, revert to step 1
             if (cart.length === 0 && currentCartStep === 2) {
                 goToCheckoutStep(1);
             }
@@ -813,7 +967,6 @@
                     </div>
                 `).join('');
 
-                // Update Totals
                 const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
                 const shipping = deliveryMethod === 'DELIVERY' ? 60 : 0;
                 
@@ -833,7 +986,7 @@
             const delivery = document.getElementById('lbl-delivery');
             const addressField = document.getElementById('cust-address');
 
-            if (!bopis || !delivery || !addressField) return; // Failsafe
+            if (!bopis || !delivery || !addressField) return;
 
             if(val === 'BOPIS') {
                 bopis.className = "flex items-center justify-between p-2.5 sm:p-3 border rounded-lg cursor-pointer transition-colors border-orange-500 bg-orange-50";
@@ -844,7 +997,7 @@
                 delivery.className = "flex items-center justify-between p-2.5 sm:p-3 border rounded-lg cursor-pointer transition-colors border-orange-500 bg-orange-50";
                 addressField.classList.remove('hidden');
             }
-            renderCart(); // recalculate shipping
+            renderCart(); 
         }
 
         function updatePayment(val) {
@@ -852,7 +1005,7 @@
             const cod = document.getElementById('lbl-cod');
             const bkash = document.getElementById('lbl-bkash');
 
-            if (!cod || !bkash) return; // Failsafe to prevent crashing
+            if (!cod || !bkash) return;
 
             const codIcon = cod.querySelector('svg, i');
             const codSpan = cod.querySelector('span');
@@ -883,15 +1036,15 @@
             element.classList.add('border-slate-200', 'bg-slate-50');
         }
 
-        function handleCheckout() {
+        async function handleCheckout() {
             const nameEl = document.getElementById('cust-name');
             const idEl = document.getElementById('cust-id');
             const phoneEl = document.getElementById('cust-phone');
             const addressEl = document.getElementById('cust-address');
 
             let isValid = true;
+            let errorMessage = "⚠️ Please fill in all required customer details.";
             
-            // Validate required fields
             [nameEl, idEl, phoneEl].forEach(el => {
                 if(!el.value.trim()) {
                     el.classList.remove('border-slate-200', 'bg-slate-50');
@@ -900,6 +1053,15 @@
                 }
             });
 
+            // 11-Digit Phone Number Validation
+            const phoneVal = phoneEl.value.trim();
+            if (phoneVal && !/^\d{11}$/.test(phoneVal)) {
+                phoneEl.classList.remove('border-slate-200', 'bg-slate-50');
+                phoneEl.classList.add('border-red-500', 'ring-red-500', 'bg-red-50');
+                isValid = false;
+                errorMessage = "⚠️ Phone number must be exactly 11 digits.";
+            }
+
             if(deliveryMethod === 'DELIVERY' && !addressEl.value.trim()) {
                 addressEl.classList.remove('border-slate-200', 'bg-slate-50');
                 addressEl.classList.add('border-red-500', 'ring-red-500', 'bg-red-50');
@@ -907,19 +1069,60 @@
             }
 
             if(!isValid) {
-                showToast("⚠️ Please fill in all required customer details.");
+                showToast(errorMessage);
                 return;
             }
 
-            // Generate Mock Order ID
+            // Generate Order Details
             const orderId = 'UIU-' + Math.random().toString(36).substr(2, 6).toUpperCase();
-            
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const shipping = deliveryMethod === 'DELIVERY' ? 60 : 0;
+            const total = subtotal + shipping;
+            const customerName = nameEl.value.trim();
+
+            const orderData = {
+                orderId: orderId,
+                customer: {
+                    name: customerName,
+                    uiuId: idEl.value.trim(),
+                    phone: phoneEl.value.trim(),
+                    address: addressEl.value.trim()
+                },
+                items: cart.map(i => ({ id: i.id, title: i.title, quantity: i.quantity, price: i.price })),
+                deliveryMethod: deliveryMethod,
+                paymentMethod: paymentMethod,
+                totals: { subtotal, shipping, total },
+                status: "Pending",
+                createdAt: new Date().toISOString()
+            };
+
+            // Save globally for PDF receipt generation
+            window.lastOrderData = orderData;
+
+            // Save to Firebase Backend
+            if (user && db) {
+                try {
+                    const btn = document.getElementById('btn-submit-order');
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 mr-2 animate-spin"></i> Processing...`;
+                    lucide.createIcons();
+                    
+                    const ordersRef = collection(db, 'artifacts', appId, 'public', 'data', 'orders');
+                    await addDoc(ordersRef, orderData);
+                    
+                    btn.innerHTML = originalText;
+                } catch(e) {
+                    console.error("Firebase save failed:", e);
+                    showToast("⚠️ Note: Saved locally (Database unavailable).");
+                }
+            }
+
             // Populate Success Modal
-            document.getElementById('success-name').textContent = nameEl.value.trim().split(' ')[0]; // First name
+            document.getElementById('success-name').textContent = customerName.split(' ')[0];
             document.getElementById('success-order-id').textContent = orderId;
             document.getElementById('success-method').textContent = `${paymentMethod === 'COD' ? 'Cash on Delivery' : 'Digital Payment'} • ${deliveryMethod === 'BOPIS' ? 'Campus Pickup' : 'Home Delivery'}`;
 
-            // Show Success Modal
+            // Show Success Modal & Close Cart
             document.getElementById('success-overlay').classList.remove('hidden');
             setTimeout(() => {
                 document.getElementById('success-overlay').classList.remove('opacity-0');
@@ -927,14 +1130,13 @@
                 document.getElementById('success-modal').classList.add('scale-100');
             }, 10);
             
-            // Close Cart Drawer (keep body locked because success modal is open)
             document.getElementById('cart-overlay').classList.add('opacity-0');
             document.getElementById('cart-drawer').classList.add('translate-x-full');
             setTimeout(() => {
                 document.getElementById('cart-overlay').classList.add('hidden');
             }, 300);
 
-            // Clear Cart and Form State
+            // Reset
             cart = [];
             goToCheckoutStep(1);
             renderCart();
@@ -950,8 +1152,115 @@
             document.getElementById('success-modal').classList.add('scale-95');
             setTimeout(() => {
                 document.getElementById('success-overlay').classList.add('hidden');
-                toggleBodyScroll(false); // Finally unlock body scrolling
+                toggleBodyScroll(false); 
             }, 300);
+        }
+
+        function downloadReceipt() {
+            if (!window.lastOrderData) {
+                showToast("⚠️ No recent order found to download.");
+                return;
+            }
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                const order = window.lastOrderData;
+
+                // --- PDF Styling & Content ---
+                doc.setFont("helvetica");
+
+                // Header
+                doc.setFontSize(22);
+                doc.setTextColor(249, 115, 22); // Orange-500
+                doc.text("UIU Bookshop", 105, 20, null, null, "center");
+                
+                doc.setFontSize(12);
+                doc.setTextColor(100, 116, 139); // Slate-500
+                doc.text("Official Order Receipt", 105, 28, null, null, "center");
+
+                doc.setLineWidth(0.5);
+                doc.setDrawColor(226, 232, 240); // Slate-200
+                doc.line(20, 35, 190, 35);
+
+                // Order Info
+                doc.setFontSize(10);
+                doc.setTextColor(15, 23, 42); // Slate-900
+                
+                doc.text(`Order Reference:`, 20, 45);
+                doc.setFont(undefined, 'bold');
+                doc.text(`${order.orderId}`, 55, 45);
+                doc.setFont(undefined, 'normal');
+
+                doc.text(`Date:`, 20, 52);
+                doc.text(`${new Date(order.createdAt).toLocaleString()}`, 55, 52);
+
+                doc.text(`Delivery:`, 20, 59);
+                doc.text(`${order.deliveryMethod === 'BOPIS' ? 'Campus Pickup' : 'Home Delivery'}`, 55, 59);
+
+                // Customer Info
+                doc.text(`Customer Name:`, 120, 45);
+                doc.setFont(undefined, 'bold');
+                doc.text(`${order.customer.name}`, 150, 45);
+                doc.setFont(undefined, 'normal');
+
+                doc.text(`UIU ID:`, 120, 52);
+                doc.text(`${order.customer.uiuId}`, 150, 52);
+
+                doc.text(`Phone:`, 120, 59);
+                doc.text(`${order.customer.phone}`, 150, 59);
+
+                // Table Header
+                doc.setFillColor(248, 250, 252); // Slate-50
+                doc.rect(20, 70, 170, 10, 'F');
+                doc.setFont(undefined, 'bold');
+                doc.text("Item Description", 25, 76);
+                doc.text("Qty", 140, 76, null, null, "center");
+                doc.text("Price", 185, 76, null, null, "right");
+                doc.setFont(undefined, 'normal');
+
+                // Table Rows
+                let y = 88;
+                order.items.forEach(item => {
+                    const title = doc.splitTextToSize(item.title, 100);
+                    doc.text(title, 25, y);
+                    doc.text(item.quantity.toString(), 140, y, null, null, "center");
+                    doc.text(`BDT ${item.price * item.quantity}`, 185, y, null, null, "right");
+                    y += title.length * 5 + 5;
+                });
+
+                doc.line(20, y, 190, y);
+                y += 10;
+
+                // Totals
+                doc.text(`Subtotal:`, 140, y);
+                doc.text(`BDT ${order.totals.subtotal}`, 185, y, null, null, "right");
+                y += 8;
+                
+                doc.text(`Shipping:`, 140, y);
+                doc.text(order.totals.shipping === 0 ? 'Free' : `BDT ${order.totals.shipping}`, 185, y, null, null, "right");
+                y += 10;
+
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(249, 115, 22);
+                doc.text(`Total Paid:`, 140, y);
+                doc.text(`BDT ${order.totals.total}`, 185, y, null, null, "right");
+
+                // Footer
+                doc.setFontSize(9);
+                doc.setFont(undefined, 'normal');
+                doc.setTextColor(148, 163, 184);
+                doc.text("Thank you for shopping with UIU Bookshop!", 105, 280, null, null, "center");
+
+                // Save
+                doc.save(`UIU_Bookshop_${order.orderId}.pdf`);
+                showToast("Receipt downloaded successfully!");
+                
+            } catch (error) {
+                console.error("PDF generation failed", error);
+                showToast("⚠️ Failed to generate receipt. Please ensure popups are allowed.");
+            }
         }
 
         // Drawers & Modals
@@ -975,9 +1284,8 @@
         }
 
         function openCart() {
-            goToCheckoutStep(1); // Always default to step 1 when opening
+            goToCheckoutStep(1);
             document.getElementById('cart-overlay').classList.remove('hidden');
-            // small delay for transition
             setTimeout(() => {
                 document.getElementById('cart-overlay').classList.remove('opacity-0');
                 document.getElementById('cart-drawer').classList.remove('translate-x-full');
@@ -1019,7 +1327,6 @@
                 authBadge.classList.remove('flex');
             }
 
-            // Bind add to cart button
             const addBtn = document.getElementById('qv-add-btn');
             addBtn.onclick = () => addToCart(book.id);
 
@@ -1075,6 +1382,178 @@
             }, 3000);
         }
 
+        // ================= ADMIN DASHBOARD LOGIC =================
+        function openAdminLogin() {
+            document.getElementById('admin-userid').value = '';
+            document.getElementById('admin-password').value = '';
+            
+            document.getElementById('admin-login-overlay').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('admin-login-overlay').classList.remove('opacity-0');
+                document.getElementById('admin-login-modal').classList.remove('scale-95');
+                document.getElementById('admin-login-modal').classList.add('scale-100');
+            }, 10);
+            toggleBodyScroll(true);
+            setTimeout(() => document.getElementById('admin-userid').focus(), 100);
+        }
+
+        function closeAdminLogin() {
+            document.getElementById('admin-login-overlay').classList.add('opacity-0');
+            document.getElementById('admin-login-modal').classList.remove('scale-100');
+            document.getElementById('admin-login-modal').classList.add('scale-95');
+            setTimeout(() => {
+                document.getElementById('admin-login-overlay').classList.add('hidden');
+                toggleBodyScroll(false);
+            }, 300);
+        }
+
+        function verifyAdminPassword() {
+            const idInput = document.getElementById('admin-userid');
+            const pwdInput = document.getElementById('admin-password');
+            
+            if (idInput.value.trim() === "admin" && pwdInput.value === "uiu2026") {
+                closeAdminLogin();
+                setTimeout(() => {
+                    toggleAdmin(); 
+                }, 300);
+            } else {
+                showToast("⚠️ Incorrect ID or Password");
+                
+                [idInput, pwdInput].forEach(el => {
+                    el.classList.remove('border-slate-200', 'bg-slate-50');
+                    el.classList.add('border-red-500', 'ring-red-500', 'bg-red-50');
+                    setTimeout(() => {
+                        el.classList.remove('border-red-500', 'ring-red-500', 'bg-red-50');
+                        el.classList.add('border-slate-200', 'bg-slate-50');
+                    }, 2000);
+                });
+            }
+        }
+
+        function toggleAdmin() {
+            isAdminActive = !isAdminActive;
+            const storeView = document.getElementById('store-view');
+            const adminView = document.getElementById('admin-view');
+            const searchNav = document.getElementById('nav-search-container');
+            const actionNav = document.getElementById('nav-actions-container');
+
+            if (isAdminActive) {
+                storeView.classList.add('hidden');
+                adminView.classList.remove('hidden');
+                adminView.classList.add('flex');
+                
+                searchNav.classList.add('md:hidden');
+                actionNav.classList.add('hidden');
+                
+                window.scrollTo(0,0);
+                setupAdminListener();
+            } else {
+                storeView.classList.remove('hidden');
+                adminView.classList.add('hidden');
+                adminView.classList.remove('flex');
+                
+                searchNav.classList.remove('md:hidden');
+                actionNav.classList.remove('hidden');
+
+                if (adminUnsubscribe) {
+                    adminUnsubscribe();
+                    adminUnsubscribe = null;
+                }
+            }
+        }
+
+        function setupAdminListener() {
+            if (!user || !db) {
+                document.getElementById('admin-orders-list').innerHTML = `
+                    <div class="p-8 text-center text-slate-500">
+                        <i data-lucide="database" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+                        Database connection offline.
+                    </div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            const ordersRef = collection(db, 'artifacts', appId, 'public', 'data', 'orders');
+            adminUnsubscribe = onSnapshot(ordersRef, (snapshot) => {
+                allOrders = [];
+                snapshot.forEach(doc => {
+                    allOrders.push({ docId: doc.id, ...doc.data() });
+                });
+                
+                // Sort newest first
+                allOrders.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+                renderAdminDashboard();
+            }, (error) => {
+                console.error("Admin fetch error", error);
+            });
+        }
+
+        function renderAdminDashboard() {
+            const list = document.getElementById('admin-orders-list');
+            
+            const totalOrders = allOrders.length;
+            const pending = allOrders.filter(o => o.status === 'Pending').length;
+            const revenue = allOrders.reduce((sum, o) => sum + (o.totals?.total || 0), 0);
+
+            document.getElementById('admin-stat-total').textContent = totalOrders;
+            document.getElementById('admin-stat-pending').textContent = pending;
+            document.getElementById('admin-stat-revenue').textContent = `৳${revenue}`;
+
+            if (allOrders.length === 0) {
+                 list.innerHTML = `<div class="p-12 text-center text-slate-500">No orders received yet.</div>`;
+                 return;
+            }
+
+            list.innerHTML = allOrders.map(order => {
+                const isPending = order.status === 'Pending';
+                const dateObj = new Date(order.createdAt);
+                const timeString = isNaN(dateObj.getTime()) ? 'Unknown Date' : dateObj.toLocaleString();
+
+                return `
+                <div class="p-4 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:bg-white transition-colors">
+                    <div>
+                        <div class="flex items-center gap-3 mb-1">
+                            <span class="font-bold font-mono text-orange-600">${order.orderId}</span>
+                            <span class="px-2 py-0.5 text-[10px] uppercase tracking-wider font-bold rounded-md ${isPending ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'}">
+                                ${order.status || 'Pending'}
+                            </span>
+                        </div>
+                        <p class="text-sm font-bold text-slate-900">${order.customer?.name} <span class="text-slate-500 font-normal ml-1">(${order.customer?.phone})</span></p>
+                        <p class="text-xs text-slate-400 mt-0.5">UIU ID: ${order.customer?.uiuId}</p>
+                        <p class="text-xs text-slate-400 mb-2">${timeString}</p>
+                        
+                        <div class="text-xs text-slate-700 bg-slate-100 px-3 py-2 rounded-lg mt-2 inline-block">
+                            ${order.items.map(i => `<span class="font-medium">${i.quantity}x</span> ${i.title}`).join('<br>')}
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-end gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+                        <p class="text-xl font-extrabold text-slate-900">৳${order.totals?.total}</p>
+                        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 border border-slate-200 px-2 py-1 rounded">
+                            ${order.paymentMethod} • ${order.deliveryMethod}
+                        </p>
+                        ${isPending ? `
+                            <button onclick="updateOrderStatus('${order.docId}', 'Completed')" class="mt-2 w-full sm:w-auto text-xs font-bold bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors shadow-sm flex items-center justify-center gap-1.5">
+                                <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Mark Completed
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        async function updateOrderStatus(docId, newStatus) {
+            if (!user || !db) return;
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'orders', docId);
+                await updateDoc(docRef, { status: newStatus });
+                showToast(`Order marked as ${newStatus}`);
+            } catch (e) {
+                console.error(e);
+                showToast("Failed to update order");
+            }
+        }
     </script>
 </body>
 </html>
